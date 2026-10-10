@@ -1,22 +1,23 @@
 using System.Collections.Generic;
 
 public sealed class GameState {
-    private HashSet<PlayablePiece> _playablePieces;
-    private HashSet<GhostPiece> _ghostPieces;
+    private Dictionary<int, PlayablePiece> _playablePieces;
+    private Dictionary<int, GhostPiece> _ghostPieces;
+    private int _nextIndex = 0;
     public GameState()
     {
-        _playablePieces = new HashSet<PlayablePiece>();
-        _ghostPieces = new HashSet<GhostPiece>();
+        _playablePieces = new Dictionary<int, PlayablePiece>();
+        _ghostPieces = new Dictionary<int, GhostPiece>();
         GhostPiece firstPiece = new GhostPiece();
-        _ghostPieces.Add(firstPiece);
+        _ghostPieces.Add(_nextIndex++, firstPiece);
     }
 
-    public HashSet<PlayablePiece> GetPlayablePieces()
+    public Dictionary<int, PlayablePiece> GetPlayablePieces()
     {
         return _playablePieces;
     }
 
-    public HashSet<GhostPiece> GetGhostPieces()
+    public Dictionary<int, GhostPiece> GetGhostPieces()
     {
         return _ghostPieces;
     }
@@ -24,10 +25,10 @@ public sealed class GameState {
 
     public void Spawn (int turn, PlayablePiece newPiece, GhostPiece oldPiece)
     {
-        _playablePieces.Add(newPiece);
+        _playablePieces.Add(_nextIndex++, newPiece);
         newPiece.SetOwner(turn);
-        newPiece.SetCoordsOnTop(oldPiece.GetCoords());
+        newPiece.PlaceOnTop(oldPiece.GetCoords());
         newPiece.SetNeighbors(oldPiece.GetNeighbors());
-        foreach (GhostPiece p in newPiece.CreateGhostNeighbors()) { _ghostPieces.Add(p); }
+        foreach (GhostPiece p in newPiece.CreateGhostNeighbors()) { _ghostPieces.Add(_nextIndex++, p); }
     }
 }

@@ -1,5 +1,7 @@
 using System;
 using System.Collections.Generic;
+using TMPro;
+using UnityEngine;
 
 public enum PieceType {
     ghost,
@@ -14,9 +16,10 @@ public enum PieceType {
 }
 
 public abstract class Piece {
-    private int[] _coords = {0, 0, 0};
+    private Vector3Int _coords = Vector3Int.zero;
     private Piece[] _neighbors = {null, null, null, null, null, null};
     private PieceType _type;
+    private static Dictionary<Vector2Int, Stack<Piece>> _posToPiece = new Dictionary<Vector2Int, Stack<Piece>>();
 
     // TYPE //
 
@@ -24,25 +27,36 @@ public abstract class Piece {
 
     public PieceType GetPieceType() { return _type; }
 
-    // COORDS //
-    public void SetCoords(int[] coords) { _coords[0] = coords[0]; _coords[1] = coords[1]; _coords[2] = coords[2];}
-    public void SetCoordsOnTop(int[] coords) {
-        _coords[0] = coords[0]; _coords[1] = coords[1]; _coords[2] = coords[2] + 1;
+    // POS2PIECE //
+
+    private void AddToDictionary()
+    {
+        Vector2Int pos = new Vector2Int(_coords.x, _coords.y);
+
+        if (!_posToPiece.TryGetValue(pos, out Stack<Piece> stack)) {
+            stack = new Stack<Piece>();
+            _posToPiece.Add(pos, stack);
+        }
+        stack.Push(this);
     }
-    public int[] GetCoords() { return _coords; }
+
+    // COORDS //
+    public void Place(Vector3Int coords) { _coords = coords; AddToDictionary(); }
+    public void PlaceOnTop(Vector3Int coords) { _coords = coords; _coords.z ++; AddToDictionary(); }
+    public Vector3Int GetCoords() { return _coords; }
 
     // NEIGHBORS //
 
-    public static int[] CoordsFromIndex(int[] origCoords, int i)
+    public static Vector3Int CoordsFromIndex(Vector3Int origCoords, int i)
     {
         switch (i){
-            case 0: return new int[] {origCoords[0] + 0, origCoords[1] + 1, 0};
-            case 1: return new int[] {origCoords[0] + 1, origCoords[1] + 1, 0};
-            case 2: return new int[] {origCoords[0] + 1, origCoords[1] + 0, 0};
-            case 3: return new int[] {origCoords[0] - 0, origCoords[1] - 1, 0};
-            case 4: return new int[] {origCoords[0] - 1, origCoords[1] - 1, 0};
-            case 5: return new int[] {origCoords[0] - 1, origCoords[1] - 0, 0};
-            default: return new int[] {0, 0, 0};
+            case 0: return new Vector3Int (origCoords.x + 0, origCoords.y + 1, 0);
+            case 1: return new Vector3Int (origCoords.x + 1, origCoords.y + 1, 0);
+            case 2: return new Vector3Int (origCoords.x + 1, origCoords.y + 0, 0);
+            case 3: return new Vector3Int (origCoords.x - 0, origCoords.y - 1, 0);
+            case 4: return new Vector3Int (origCoords.x - 1, origCoords.y - 1, 0);
+            case 5: return new Vector3Int (origCoords.x - 1, origCoords.y - 0, 0);
+            default: return new Vector3Int (0, 0, 0);
         }
     }
 
@@ -61,26 +75,42 @@ public abstract class Piece {
 
     public Piece[] GetNeighbors() { return _neighbors; }
 
+    private void CheckForNewNeighbors()
+    {
+        for (int i = 0; i < 6 && _neighbors[i] == null; i++)
+        {
+            Vector3Int nPos = CoordsFromIndex(_coords, i);
+            if (_posToPiece.TryGetValue((Vector2Int)nPos, out Stack<Piece> stack))
+            {
+                JoinNeighbors(this, stack.Peek(), i);
+            }
+        }
+    }
+
     public List<GhostPiece> CreateGhostNeighbors()
     {
         List<GhostPiece> newPieces = new List<GhostPiece>();
-        for (int i=0; i<6; ++i)
-        {
-            if (_neighbors[i] == null)
-            {
+        for (int i=0; i<6; ++i) {
+            if (_neighbors[i] == null) {
                 GhostPiece p = new GhostPiece(); //TODO: non istanziare ma prenderli da una pool
                 _neighbors[i] = p;
-                p.SetCoords(CoordsFromIndex(_coords, i));
+                p.Place(CoordsFromIndex(_coords, i));
                 newPieces.Add(p);
                 JoinNeighbors(this, p, i);
             }
         }
+
         JoinNeighbors(_neighbors[0], _neighbors[1], 2);
         JoinNeighbors(_neighbors[1], _neighbors[2], 3);
         JoinNeighbors(_neighbors[2], _neighbors[3], 4);
         JoinNeighbors(_neighbors[3], _neighbors[4], 5);
         JoinNeighbors(_neighbors[4], _neighbors[5], 0);
         JoinNeighbors(_neighbors[5], _neighbors[0], 1);
+
+        for (int i=0; i<6; ++i) {
+            _neighbors[i].CheckForNewNeighbors();
+        }
+
         return newPieces;
     }
 }

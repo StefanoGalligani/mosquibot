@@ -9,13 +9,15 @@ public class PieceObject : MonoBehaviour
 
     private Piece _referencePiece;
     private static Vector3 _xDir = new Vector3(0.88f, 0, 0);
-    private static Vector3 _yDir = new Vector3(-0.44f, 0.76f, 0);
-    private static Vector3 _zDir = new Vector3(0, 0, -0.2f);
+    private static Vector3 _yDir = new Vector3(-0.44f, 0, 0.76f);
+    private static Vector3 _zDir = new Vector3(0, 0.2f, 0);
 
     public void UpdatePosition()
     {
-        int[] coords = _referencePiece.GetCoords();
-        transform.position = _xDir * coords[0] + _yDir * coords[1] + _zDir * coords[2];
+        Vector3Int coords = _referencePiece.GetCoords();
+        transform.position = _xDir * coords.x + _yDir * coords.y + _zDir * coords.z;
+        _colorRenderer.sortingOrder = coords[2] * 2;
+        if (_pieceRenderer) _pieceRenderer.sortingOrder = coords[2] * 2 + 1;
     }
 
     public void AddReference(Piece piece)

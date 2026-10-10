@@ -15,11 +15,11 @@ public class GameStateVisualizer : MonoBehaviour
     //TODO: farlo con la mossa senza l'intero stato
     public void ShowGameState(GameState state)
     {
-        HashSet<PlayablePiece> playablePieces = state.GetPlayablePieces();
-        HashSet<GhostPiece> ghostPieces = state.GetGhostPieces();
+        Dictionary<int, PlayablePiece> playablePieces = state.GetPlayablePieces();
+        Dictionary<int, GhostPiece> ghostPieces = state.GetGhostPieces();
         HashSet<Piece> remainingPieces = new HashSet<Piece>();
-        foreach (Piece p in playablePieces) remainingPieces.Add(p);
-        foreach (Piece p in ghostPieces) remainingPieces.Add(p);
+        foreach (KeyValuePair<int, PlayablePiece> p in playablePieces) remainingPieces.Add(p.Value);
+        foreach (KeyValuePair<int, GhostPiece> p in ghostPieces) remainingPieces.Add(p.Value);
 
         foreach (PieceObject po in _pieceObjs)
         {

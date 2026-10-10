@@ -12,15 +12,15 @@ public sealed class GameManager : MonoBehaviour
     {
         _currentState = new GameState();
         _visualizer.ShowGameState(_currentState);
-        _currentState.Spawn(_turn, new QueenPiece(), _currentState.GetGhostPieces().ElementAt(0));
+        PlacePiece(new QueenPiece(), _currentState.GetGhostPieces().ElementAt(0).Value);
+        PlacePiece(new QueenPiece(), _currentState.GetGhostPieces().ElementAt(1).Value);
+    }
+
+    public void PlacePiece (PlayablePiece newPiece, GhostPiece oldPiece)
+    {
+        _currentState.Spawn(_turn, newPiece, oldPiece);
         _turn = 1 - _turn;
-        _visualizer.ShowGameState(_currentState);
-        _currentState.Spawn(_turn, new AntPiece(), _currentState.GetGhostPieces().ElementAt(1));
         _visualizer.ShowGameState(_currentState);
     }
 
-    void Update()
-    {
-        
-    }
 }
