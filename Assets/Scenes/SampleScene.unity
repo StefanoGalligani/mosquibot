@@ -760,6 +760,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _piecePrefab: {fileID: -8822559768484310482, guid: 2ea955dbd7bc2c1af803c75ef7e59a96, type: 3}
+  _pieceIconPrefab: {fileID: 7775602250881428446, guid: e2044efc8cb7f5bd7998993f2aeee85d, type: 3}
+  _whiteReserve: {fileID: 981986567}
+  _blackReserve: {fileID: 2090646986}
 --- !u!114 &1316639531
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -71,10 +71,9 @@ public abstract class Piece {
         }
     }
 
-
     public static void JoinNeighbors (Piece p1, Piece p2, int dir)
     {
-        p1._neighbors[dir] = p2;
+        if (p1 != null) p1._neighbors[dir] = p2;
         if (p2 != null) p2._neighbors[(dir + 3) % 6] = p1;
     }
 
@@ -119,7 +118,7 @@ public abstract class PlayablePiece : Piece
     // PLACEMENT //
     protected override void PlacementLogic(Vector3Int coords) {
         _coords = coords;
-        _coords.y ++;
+        _coords.z ++;
         _placed = true;
     }
 

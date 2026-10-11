@@ -7,6 +7,7 @@ public sealed class GameState {
     private Dictionary<int, PlayablePiece> _whiteReserve;
     private Dictionary<int, PlayablePiece> _blackReserve;
     private int _nextIndex = 0;
+    private int _turn = 0;
     public GameState()
     {
         _playablePieces = new Dictionary<int, PlayablePiece>();
@@ -69,13 +70,21 @@ public sealed class GameState {
         return _blackReserve;
     }
 
+    public int GetTurn() { return _turn; }
 
-    public void Spawn(PlayablePiece newPiece, GhostPiece oldPiece)
+    public void Spawn(int newPieceIndex, int oldPieceIndex)
     {
-        //TODO: rimuovere pezzo dalla riserva
+        var reserve = _turn == 0 ? _whiteReserve : _blackReserve;
+        PlayablePiece newPiece = reserve.GetValueOrDefault(newPieceIndex);
+        GhostPiece oldPiece = _ghostPieces.GetValueOrDefault(oldPieceIndex);
+
+        reserve.Remove(newPieceIndex);
+
         _playablePieces.Add(_nextIndex++, newPiece);
         newPiece.Place(oldPiece.GetCoords());
         newPiece.SetNeighbors(oldPiece.GetNeighbors());
         foreach (GhostPiece p in newPiece.CreateGhostNeighbors()) { _ghostPieces.Add(_nextIndex++, p); }
+
+        _turn = 1 - _turn; //REMINDER: va fatto dopo qualsiasi mossa
     }
 }
