@@ -17,7 +17,15 @@ public sealed class GameManager : MonoBehaviour
     
     public void PlacePiece (byte newPiece, byte oldPiece)
     {
-        _currentState.Spawn(newPiece, oldPiece);
+        Move m = new SpawnMove(newPiece, oldPiece);
+        _currentState.ApplyMove(m);
+        _visualizer.ShowGameState(_currentState);
+    }
+
+    public void MovePiece (byte piece, byte newPosition, byte pieceOwner, bool isOnTopOfPiece)
+    {
+        Move m = new MovementMove(piece, newPosition, pieceOwner, isOnTopOfPiece);
+        _currentState.ApplyMove(m);
         _visualizer.ShowGameState(_currentState);
     }
 

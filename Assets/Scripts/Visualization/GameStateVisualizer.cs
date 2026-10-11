@@ -26,7 +26,7 @@ public class GameStateVisualizer : MonoBehaviour
         foreach (KeyValuePair<byte, PlayablePiece> p in playedPieces)   remainingPieces.Add(p.Value);
         foreach (KeyValuePair<byte, GhostPiece> p in ghostPieces)       remainingPieces.Add(p.Value);
 
-        Dictionary<byte, GhostPiece> availableSpawns = state.GetTurn() == 0 || state.GetMove() == 1 ?
+        Dictionary<byte, GhostPiece> availableSpawns = state.GetTurn() == 0 || state.GetMoveCount() == 1 ?
             state.GetWhiteSpawns() : state.GetBlackSpawns();
 
         foreach (PieceObject po in _pieceObjs)

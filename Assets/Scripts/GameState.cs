@@ -13,7 +13,7 @@ public sealed class GameState {
     private Dictionary<byte, GhostPiece> _blackSpawns;
     private byte _nextIndex = 0;
     private byte _turn = 0;
-    private byte _move = 0;
+    private byte _moveCount = 0;
     private bool _whiteQueenPlaced = false;
     private bool _blackQueenPlaced = false;
     private byte _wqIndex;
@@ -77,12 +77,12 @@ public sealed class GameState {
 
     public Dictionary<byte, PlayablePiece> GetWhiteReserve()
     {
-        return (_move == 6 && !_whiteQueenPlaced) ? _whiteQueenOnlyReserve : _whiteReserve;
+        return (_moveCount == 6 && !_whiteQueenPlaced) ? _whiteQueenOnlyReserve : _whiteReserve;
     }
 
     public Dictionary<byte, PlayablePiece> GetBlackReserve()
     {
-        return (_move == 7 && !_blackQueenPlaced) ? _blackQueenOnlyReserve : _blackReserve;
+        return (_moveCount == 7 && !_blackQueenPlaced) ? _blackQueenOnlyReserve : _blackReserve;
     }
 
     public Dictionary<byte, GhostPiece> GetWhiteSpawns()
@@ -96,12 +96,17 @@ public sealed class GameState {
     }
 
     public byte GetTurn() { return _turn; }
-    public int GetMove() { return _move; }
+    public int GetMoveCount() { return _moveCount; }
+
+    public void ApplyMove(Move m)
+    {
+        m.PerformMove(this);
+    }
 
     public void Spawn(byte newPieceIndex, byte oldPieceIndex)
     {
         var reserve =     _turn == 0 ?              _whiteReserve : _blackReserve;
-        var startSpawns = _turn == 0 || _move == 1? _whiteSpawns : _blackSpawns;
+        var startSpawns = _turn == 0 || _moveCount == 1? _whiteSpawns : _blackSpawns;
         var newSpawns =   _turn == 0 ?              _whiteSpawns : _blackSpawns;
         PlayablePiece newPiece = reserve.GetValueOrDefault(newPieceIndex);
         GhostPiece oldPiece = startSpawns.GetValueOrDefault(oldPieceIndex);
@@ -119,12 +124,17 @@ public sealed class GameState {
         }
 
         _turn = (byte)(1 - _turn); //REMINDER: va fatto dopo qualsiasi mossa
-        _move++;
+        _moveCount++;
 
         if      (newPieceIndex == _wqIndex) _whiteQueenPlaced = true;
         else if (newPieceIndex == _bqIndex) _blackQueenPlaced = true;
-        if      (_move == 1) _whiteReserve.Add(_wqIndex, _whiteQueenOnlyReserve.GetValueOrDefault(_wqIndex));
-        else if (_move == 2) _blackReserve.Add(_bqIndex, _blackQueenOnlyReserve.GetValueOrDefault(_bqIndex));
+        if      (_moveCount == 1) _whiteReserve.Add(_wqIndex, _whiteQueenOnlyReserve.GetValueOrDefault(_wqIndex));
+        else if (_moveCount == 2) _blackReserve.Add(_bqIndex, _blackQueenOnlyReserve.GetValueOrDefault(_bqIndex));
+    }
+
+    public void MovePiece(byte pieceIndex, byte positionIndex, byte pieceOwner, bool isOnTopOfPiece)
+    {
+        
     }
 
     public void UpdateSpawnInfo (byte ghostIndex, byte previousOwner, byte newOwner, GhostPiece p)
