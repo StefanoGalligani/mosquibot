@@ -12,6 +12,8 @@ public class PieceObject : MonoBehaviour
     private static Vector3 _yDir = new Vector3(-0.44f, 0, 0.76f);
     private static Vector3 _zDir = new Vector3(0, 0.2f, 0);
 
+    private bool _visible = true;
+
     public void UpdatePosition()
     {
         Vector3Int coords = _referencePiece.GetCoords();
@@ -19,6 +21,18 @@ public class PieceObject : MonoBehaviour
         foreach (var r in _colorRenderers) r.sortingOrder = coords[2] * 2;
         if (_pieceRenderer) _pieceRenderer.sortingOrder = coords[2] * 2 + 1;
     }
+
+    public void SetVisibility(bool on)
+    {
+        foreach (var r in _colorRenderers)
+        {
+            r.enabled = on;
+        }
+        _pieceRenderer.enabled = on;
+        _visible = on;
+    }
+
+    public bool IsVisible() { return _visible; }
 
     public void AddReference(Piece piece)
     {

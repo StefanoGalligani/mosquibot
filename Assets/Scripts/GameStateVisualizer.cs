@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using System.Linq;
 using UnityEngine;
 
 public class GameStateVisualizer : MonoBehaviour
@@ -15,15 +16,17 @@ public class GameStateVisualizer : MonoBehaviour
         _pieceObjs = new List<PieceObject>();
     }
 
-    //TODO: farlo con la mossa senza l'intero stato
     public void ShowGameState(GameState state)
     {
         if (_pieceIcons == null) InitIcons(state);
-        Dictionary<int, PlayablePiece> playedPieces = state.GetPlayablePieces();
-        Dictionary<int, GhostPiece> ghostPieces = state.GetGhostPieces();
+        Dictionary<byte, PlayablePiece> playedPieces =  state.GetPlayablePieces();
+        Dictionary<byte, GhostPiece> ghostPieces =      state.GetGhostPieces();
         HashSet<Piece> remainingPieces = new HashSet<Piece>();
-        foreach (KeyValuePair<int, PlayablePiece> p in playedPieces) remainingPieces.Add(p.Value);
-        foreach (KeyValuePair<int, GhostPiece> p in ghostPieces) remainingPieces.Add(p.Value);
+        foreach (KeyValuePair<byte, PlayablePiece> p in playedPieces)   remainingPieces.Add(p.Value);
+        foreach (KeyValuePair<byte, GhostPiece> p in ghostPieces)       remainingPieces.Add(p.Value);
+
+        Dictionary<byte, GhostPiece> availableSpawns = state.GetTurn() == 0 || state.GetMove() == 1 ?
+            state.GetWhiteSpawns() : state.GetBlackSpawns();
 
         foreach (PieceObject po in _pieceObjs)
         {
@@ -39,7 +42,14 @@ public class GameStateVisualizer : MonoBehaviour
             _pieceObjs.Add(newPObj);
 
             foreach (PieceIcon i in _pieceIcons) if (i.GetReference() == p) Destroy(i.gameObject);
-        }
+        }      
+        foreach (PieceObject po in _pieceObjs)
+        {
+            if (po.GetReference() is GhostPiece)
+            {
+                po.SetVisibility(availableSpawns.Values.Contains((GhostPiece)(po.GetReference())));
+            }
+        }  
     }
 
     private PieceIcon InitIcon(PlayablePiece p)
@@ -53,8 +63,8 @@ public class GameStateVisualizer : MonoBehaviour
     private void InitIcons(GameState state)
     {
         _pieceIcons = new List<PieceIcon>();
-        Dictionary<int, PlayablePiece> whitePieces = state.GetWhiteReserve();
-        Dictionary<int, PlayablePiece> blackPieces = state.GetBlackReserve();
+        Dictionary<byte, PlayablePiece> whitePieces = state.GetWhiteReserve();
+        Dictionary<byte, PlayablePiece> blackPieces = state.GetBlackReserve();
 
         foreach(PlayablePiece p in whitePieces.Values)
         {

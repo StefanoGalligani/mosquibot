@@ -2,22 +2,28 @@ using System.Collections.Generic;
 using UnityEngine;
 
 public sealed class GameState {
-    private Dictionary<int, PlayablePiece> _playablePieces;
-    private Dictionary<int, GhostPiece> _ghostPieces;
-    private Dictionary<int, PlayablePiece> _whiteReserve;
-    private Dictionary<int, PlayablePiece> _blackReserve;
-    private int _nextIndex = 0;
-    private int _turn = 0;
+    private Dictionary<byte, PlayablePiece> _playablePieces;
+    private Dictionary<byte, GhostPiece> _ghostPieces;
+    private Dictionary<byte, PlayablePiece> _whiteReserve;
+    private Dictionary<byte, PlayablePiece> _blackReserve;
+    private Dictionary<byte, GhostPiece> _whiteSpawns;
+    private Dictionary<byte, GhostPiece> _blackSpawns;
+    private byte _nextIndex = 0;
+    private byte _turn = 0;
+    private byte _move = 0;
     public GameState()
     {
-        _playablePieces = new Dictionary<int, PlayablePiece>();
-        _ghostPieces = new Dictionary<int, GhostPiece>();
-        _whiteReserve = new Dictionary<int, PlayablePiece>();
-        _blackReserve = new Dictionary<int, PlayablePiece>();
+        _playablePieces =   new Dictionary<byte, PlayablePiece>();
+        _ghostPieces =      new Dictionary<byte, GhostPiece>();
+        _whiteReserve =     new Dictionary<byte, PlayablePiece>();
+        _blackReserve =     new Dictionary<byte, PlayablePiece>();
+        _whiteSpawns =      new Dictionary<byte, GhostPiece>();
+        _blackSpawns =      new Dictionary<byte, GhostPiece>();
 
         GhostPiece firstPiece = new GhostPiece();
         firstPiece.Place(new Vector3Int(0, 0, 0));
-        _ghostPieces.Add(_nextIndex++, firstPiece);
+        _ghostPieces.Add(_nextIndex, firstPiece.SetIndexAndState(_nextIndex, this));
+        _whiteSpawns.Add(_nextIndex++, firstPiece);
 
         _whiteReserve.Add(_nextIndex++, new QueenPiece().SetOwner(0));
         _whiteReserve.Add(_nextIndex++, new AntPiece().SetOwner(0));
@@ -50,41 +56,68 @@ public sealed class GameState {
         _blackReserve.Add(_nextIndex++, new PillbugPiece().SetOwner(1));
     }
 
-    public Dictionary<int, PlayablePiece> GetPlayablePieces()
+    public Dictionary<byte, PlayablePiece> GetPlayablePieces()
     {
         return _playablePieces;
     }
 
-    public Dictionary<int, GhostPiece> GetGhostPieces()
+    public Dictionary<byte, GhostPiece> GetGhostPieces()
     {
         return _ghostPieces;
     }
 
-    public Dictionary<int, PlayablePiece> GetWhiteReserve()
+    public Dictionary<byte, PlayablePiece> GetWhiteReserve()
     {
         return _whiteReserve;
     }
 
-    public Dictionary<int, PlayablePiece> GetBlackReserve()
+    public Dictionary<byte, PlayablePiece> GetBlackReserve()
     {
         return _blackReserve;
     }
 
-    public int GetTurn() { return _turn; }
-
-    public void Spawn(int newPieceIndex, int oldPieceIndex)
+    public Dictionary<byte, GhostPiece> GetWhiteSpawns()
     {
-        var reserve = _turn == 0 ? _whiteReserve : _blackReserve;
+        return _whiteSpawns;
+    }
+
+    public Dictionary<byte, GhostPiece> GetBlackSpawns()
+    {
+        return _blackSpawns;
+    }
+
+    public byte GetTurn() { return _turn; }
+    public int GetMove() { return _move; }
+
+    public void Spawn(byte newPieceIndex, byte oldPieceIndex)
+    {
+        var reserve =     _turn == 0 ?              _whiteReserve : _blackReserve;
+        var startSpawns = _turn == 0 || _move == 1? _whiteSpawns : _blackSpawns;
+        var newSpawns =   _turn == 0 ?              _whiteSpawns : _blackSpawns;
         PlayablePiece newPiece = reserve.GetValueOrDefault(newPieceIndex);
-        GhostPiece oldPiece = _ghostPieces.GetValueOrDefault(oldPieceIndex);
+        GhostPiece oldPiece = startSpawns.GetValueOrDefault(oldPieceIndex);
 
         reserve.Remove(newPieceIndex);
+        startSpawns.Remove(oldPieceIndex);
 
         _playablePieces.Add(_nextIndex++, newPiece);
         newPiece.Place(oldPiece.GetCoords());
         newPiece.SetNeighbors(oldPiece.GetNeighbors());
-        foreach (GhostPiece p in newPiece.CreateGhostNeighbors()) { _ghostPieces.Add(_nextIndex++, p); }
+        newPiece.SetCoveredPiece(oldPiece);
+        foreach (GhostPiece p in newPiece.CreateGhostNeighbors()) {
+            _ghostPieces.Add(_nextIndex, p.SetIndexAndState(_nextIndex, this));
+            newSpawns.Add(_nextIndex++, p);
+        }
 
-        _turn = 1 - _turn; //REMINDER: va fatto dopo qualsiasi mossa
+        _turn = (byte)(1 - _turn); //REMINDER: va fatto dopo qualsiasi mossa
+        _move++;
+    }
+
+    public void UpdateSpawnInfo (byte ghostIndex, byte previousOwner, byte newOwner, GhostPiece p)
+    {
+        if      (previousOwner == 0) { _whiteSpawns.Remove(ghostIndex); }
+        else if (previousOwner == 1) { _blackSpawns.Remove(ghostIndex); }
+        if      (newOwner == 0)      { _whiteSpawns.Add(ghostIndex, p); }
+        else if (newOwner == 1)      { _blackSpawns.Add(ghostIndex, p); }
     }
 }

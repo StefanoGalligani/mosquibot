@@ -22,34 +22,34 @@ public class PlacementManager : MonoBehaviour
         return false;
     }
 
-    private int FindIndexByGhostPiece(GhostPiece piece)
+    private byte FindIndexByGhostPiece(GhostPiece piece)
     {
-        Dictionary<int, GhostPiece> dict = _gameManager.GetCurrentState().GetGhostPieces();
-        foreach (KeyValuePair<int, GhostPiece> pair in dict)
+        Dictionary<byte, GhostPiece> dict = _gameManager.GetCurrentState().GetGhostPieces();
+        foreach (KeyValuePair<byte, GhostPiece> pair in dict)
         {
             if (pair.Value == piece) return pair.Key;
         }
-        return -1;
+        return 255;
     }
 
-    private int FindIndexByPlayablePiece(PlayablePiece piece)
+    private byte FindIndexByPlayablePiece(PlayablePiece piece)
     {
-        Dictionary<int, PlayablePiece> dict = piece.GetOwner() == 0 ?
+        Dictionary<byte, PlayablePiece> dict = piece.GetOwner() == 0 ?
             _gameManager.GetCurrentState().GetWhiteReserve() :
             _gameManager.GetCurrentState().GetBlackReserve();
-        foreach (KeyValuePair<int, PlayablePiece> pair in dict)
+        foreach (KeyValuePair<byte, PlayablePiece> pair in dict)
         {
             if (pair.Value == piece) return pair.Key;
         }
-        return -1;
+        return 255;
     }
 
-    private void TryPlacingPiece(GhostPiece ghost)
+    private void TryPlacingPiece(PieceObject ghostObject)
     {
-        if (_candidatePiece == null) return;
+        if (_candidatePiece == null || !ghostObject.IsVisible()) return;
         _gameManager.PlacePiece(
             FindIndexByPlayablePiece(_candidatePiece.GetReference()),
-            FindIndexByGhostPiece(ghost));
+            FindIndexByGhostPiece((GhostPiece)ghostObject.GetReference()));
         _candidatePiece = null;
     }
 
@@ -63,7 +63,7 @@ public class PlacementManager : MonoBehaviour
 
                 if (pObj.GetReference() is GhostPiece)
                 {
-                    TryPlacingPiece((GhostPiece)pObj.GetReference());
+                    TryPlacingPiece(pObj);
                 }
             }
         }

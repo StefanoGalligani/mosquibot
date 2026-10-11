@@ -60,7 +60,7 @@ public abstract class Piece {
 
     private void CheckForNewNeighbors()
     {
-        for (int i = 0; i < 6; i++)
+        for (byte i = 0; i < 6; i++)
         {
             if (_neighbors[i] != null) continue;
             Vector3Int nPos = CoordsFromIndex(_coords, i);
@@ -71,14 +71,18 @@ public abstract class Piece {
         }
     }
 
-    public static void JoinNeighbors (Piece p1, Piece p2, int dir)
+    protected abstract void UpdateNeighborInfo(Piece newNeighbor, byte dir);
+
+    public static void JoinNeighbors (Piece p1, Piece p2, byte dir)
     {
-        if (p1 != null) p1._neighbors[dir] = p2;
-        if (p2 != null) p2._neighbors[(dir + 3) % 6] = p1;
+        if (p1 != null) {
+            p1._neighbors[dir] = p2; p1.UpdateNeighborInfo(p2, dir); }
+        if (p2 != null) { byte d1 = (byte)((dir + 3) % 6);
+            p2._neighbors[d1] = p1; p2.UpdateNeighborInfo(p1, d1); }
     }
 
     public void SetNeighbors(Piece[] neighbors) {
-        for (int i = 0; i < 6; i++)
+        for (byte i = 0; i < 6; i++)
         {
             JoinNeighbors(this, neighbors[i], i);
         }
@@ -88,13 +92,13 @@ public abstract class Piece {
     public List<GhostPiece> CreateGhostNeighbors()
     {
         List<GhostPiece> newPieces = new List<GhostPiece>();
-        for (int i=0; i<6; ++i) {
+        for (byte i=0; i<6; ++i) {
             if (_neighbors[i] == null) {
                 GhostPiece p = new GhostPiece(); //TODO: non istanziare ma prenderli da una pool
                 p.Place(CoordsFromIndex(_coords, i));
                 newPieces.Add(p);
                 JoinNeighbors(this, p, i);
-                JoinNeighbors(_neighbors[(i + 5) % 6], _neighbors[i], (i + 1) % 6);
+                JoinNeighbors(_neighbors[(i + 5) % 6], _neighbors[i], (byte)((i + 1) % 6));
             }
         }
 
@@ -108,12 +112,13 @@ public abstract class Piece {
 
 public abstract class PlayablePiece : Piece
 {
-    private int _owner = 0;
+    private byte _owner = 0;
     private bool _placed = false;
+    private Piece _coveredPiece;
 
     // OWNER //
-    public PlayablePiece SetOwner(int owner) { _owner = owner; return this; }
-    public int GetOwner() { return _owner; }
+    public PlayablePiece SetOwner(byte owner) { _owner = owner; return this; }
+    public byte GetOwner() { return _owner; }
 
     // PLACEMENT //
     protected override void PlacementLogic(Vector3Int coords) {
@@ -122,17 +127,66 @@ public abstract class PlayablePiece : Piece
         _placed = true;
     }
 
+    public void SetCoveredPiece(Piece p) { _coveredPiece = p; }
+
     public bool IsPlaced() { return _placed; }
+
+    // NEIGHBORS
+
+    protected override void UpdateNeighborInfo(Piece newNeighbor, byte dir)
+    {
+        // TODO implementarlo nelle sottoclassi
+    }
 }
 
 public sealed class GhostPiece : Piece {
+    private byte[] _neighborColorsCount = {0, 0, 6};
+    private byte[] _neighbourColors = {2, 2, 2, 2, 2, 2};
+    private byte _spawnColor = 2;
+    private byte _index;
+    private GameState _state;
+
     public GhostPiece()
     {
         SetPieceType(PieceType.ghost);
     }
+
+    public GhostPiece SetIndexAndState(byte index, GameState state)
+    {
+        _index = index;
+        _state = state;
+        return this;
+    }
+
     protected override void PlacementLogic(Vector3Int coords) {
         _coords = coords;
     }
+
+    // NEIGHBORS
+
+    protected override void UpdateNeighborInfo(Piece newNeighbor, byte dir)
+    {
+        byte newColor = newNeighbor != null && newNeighbor is PlayablePiece ?
+            ((PlayablePiece)newNeighbor).GetOwner() : (byte)2;
+        if (_neighbourColors[dir] != newColor)
+        {
+            _neighborColorsCount[_neighbourColors[dir]] --;
+            _neighborColorsCount[newColor] ++;
+            _neighbourColors[dir] = newColor;
+
+            byte prevColor = _spawnColor;
+
+            if      (_neighborColorsCount[0] != 0 && _neighborColorsCount[1] == 0) _spawnColor = 0;
+            else if (_neighborColorsCount[0] == 0 && _neighborColorsCount[1] != 0) _spawnColor = 1;
+            else _spawnColor = 2;
+
+            if (_state != null && prevColor != _spawnColor)
+                _state.UpdateSpawnInfo(_index, prevColor, _spawnColor, this);
+        }
+    }
+
+    public byte GetSpawnColor() { return _spawnColor; }
+
 }
 
 public sealed class QueenPiece : PlayablePiece {
