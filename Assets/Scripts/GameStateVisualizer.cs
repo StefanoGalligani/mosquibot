@@ -18,7 +18,8 @@ public class GameStateVisualizer : MonoBehaviour
 
     public void ShowGameState(GameState state)
     {
-        if (_pieceIcons == null) InitIcons(state);
+        InitIcons(state);
+        
         Dictionary<byte, PlayablePiece> playedPieces =  state.GetPlayablePieces();
         Dictionary<byte, GhostPiece> ghostPieces =      state.GetGhostPieces();
         HashSet<Piece> remainingPieces = new HashSet<Piece>();
@@ -62,6 +63,10 @@ public class GameStateVisualizer : MonoBehaviour
 
     private void InitIcons(GameState state)
     {
+        if (_pieceIcons != null)
+        {
+            foreach (PieceIcon i in _pieceIcons) Destroy(i.gameObject);
+        }
         _pieceIcons = new List<PieceIcon>();
         Dictionary<byte, PlayablePiece> whitePieces = state.GetWhiteReserve();
         Dictionary<byte, PlayablePiece> blackPieces = state.GetBlackReserve();
