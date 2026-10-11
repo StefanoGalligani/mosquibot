@@ -296,7 +296,7 @@ Transform:
   m_GameObject: {fileID: 519420028}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 10, z: -1}
+  m_LocalPosition: {x: 0, y: 10, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -533,7 +533,7 @@ Transform:
   m_GameObject: {fileID: 1832510362}
   serializedVersion: 2
   m_LocalRotation: {x: 0.5, y: 0, z: 0, w: 0.8660254}
-  m_LocalPosition: {x: 0, y: 10, z: -1}
+  m_LocalPosition: {x: 0, y: 10, z: -4}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -557,7 +557,7 @@ MonoBehaviour:
     AngularDampingMode: 0
     RotationDamping: {x: 1, y: 1, z: 1}
     QuaternionDamping: 1
-  FollowOffset: {x: 0, y: 10, z: -1}
+  FollowOffset: {x: 0, y: 10, z: -4}
 --- !u!1 &2011534029
 GameObject:
   m_ObjectHideFlags: 0
@@ -602,8 +602,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 38fb08d904449cda1834ec4e581567b5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
-  edgeSize: 15
-  moveSpeed: 3
+  _cinemachine: {fileID: 1832510363}
+  _edgeSize: 15
+  _moveSpeed: 10
+  _zoomSpeed: 10
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
