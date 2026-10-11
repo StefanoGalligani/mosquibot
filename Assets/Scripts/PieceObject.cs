@@ -4,7 +4,7 @@ using UnityEngine;
 public class PieceObject : MonoBehaviour
 {
     [SerializeField] private Sprite[] _pieceSprites;
-    [SerializeField] private SpriteRenderer _colorRenderer;
+    [SerializeField] private SpriteRenderer[] _colorRenderers;
     [SerializeField] private SpriteRenderer _pieceRenderer;
 
     private Piece _referencePiece;
@@ -16,7 +16,7 @@ public class PieceObject : MonoBehaviour
     {
         Vector3Int coords = _referencePiece.GetCoords();
         transform.position = _xDir * coords.x + _yDir * coords.y + _zDir * coords.z;
-        _colorRenderer.sortingOrder = coords[2] * 2;
+        foreach (var r in _colorRenderers) r.sortingOrder = coords[2] * 2;
         if (_pieceRenderer) _pieceRenderer.sortingOrder = coords[2] * 2 + 1;
     }
 
@@ -26,7 +26,8 @@ public class PieceObject : MonoBehaviour
         UpdatePosition();
 
         if (piece is PlayablePiece) {
-            _colorRenderer.color = (((PlayablePiece)piece).GetOwner() == 0) ? Color.white : Color.black;
+            foreach (var r in _colorRenderers) r.color = (((PlayablePiece)piece).GetOwner() == 0) ?
+                Color.white : Color.black;
 
             Sprite sprite;
             switch (piece.GetPieceType())
@@ -43,7 +44,7 @@ public class PieceObject : MonoBehaviour
             }
             _pieceRenderer.sprite = sprite;
         } else {
-            _colorRenderer.color = Color.gray;
+            foreach (var r in _colorRenderers) r.color = Color.gray;
         }
     }
 

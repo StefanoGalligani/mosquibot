@@ -18,7 +18,7 @@ public sealed class GameManager : MonoBehaviour
 
     public void PlacePiece (PlayablePiece newPiece, GhostPiece oldPiece)
     {
-        _currentState.Spawn(_turn, newPiece, oldPiece);
+        _currentState.Spawn(newPiece, oldPiece);
         _turn = 1 - _turn;
         _visualizer.ShowGameState(_currentState);
     }

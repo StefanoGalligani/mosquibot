@@ -48,7 +48,11 @@ public class CameraTarget : MonoBehaviour
         Vector3 movement = new Vector3(horizontal, 0, vertical);
 
         if (movement.sqrMagnitude > 0f) {
-            transform.position += movement.normalized * scale * _moveSpeed * Time.deltaTime;
+            Vector3 newPosition =
+                transform.position + movement.normalized * scale * _moveSpeed * Time.deltaTime;
+            newPosition.x = Mathf.Clamp(newPosition.x, -20 , 20);
+            newPosition.z = Mathf.Clamp(newPosition.z, -20 , 20);
+            transform.position = newPosition;
         }
     }
 
@@ -61,10 +65,6 @@ public class CameraTarget : MonoBehaviour
         {
             _totalZoom += -_cameraDirection.magnitude * zoomAmount;
             transform.position += -_cameraDirection * zoomAmount;
-            Debug.Log("Total zoom: " + _totalZoom + "; Zoom: " + zoomAmount);
         }
-        /*Vector3 prevOffset = _cinemachine.GetComponent<CinemachineFollow>().FollowOffset;
-        prevOffset.y = Mathf.Clamp(prevOffset.y - zoomAmount, 1, 15);
-        _cinemachine.GetComponent<CinemachineFollow>().FollowOffset = prevOffset;*/
     }
 }

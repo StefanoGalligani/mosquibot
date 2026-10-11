@@ -1,6 +1,4 @@
-using System;
 using System.Collections.Generic;
-using TMPro;
 using UnityEngine;
 
 public enum PieceType {
@@ -16,7 +14,7 @@ public enum PieceType {
 }
 
 public abstract class Piece {
-    private Vector3Int _coords = Vector3Int.zero;
+    protected Vector3Int _coords = Vector3Int.zero;
     private Piece[] _neighbors = {null, null, null, null, null, null};
     private PieceType _type;
     private static Dictionary<Vector2Int, Stack<Piece>> _posToPiece = new Dictionary<Vector2Int, Stack<Piece>>();
@@ -41,8 +39,8 @@ public abstract class Piece {
     }
 
     // COORDS //
-    public void Place(Vector3Int coords) { _coords = coords; AddToDictionary(); }
-    public void PlaceOnTop(Vector3Int coords) { _coords = coords; _coords.z ++; AddToDictionary(); }
+    protected abstract void PlacementLogic(Vector3Int coords);
+    public void Place(Vector3Int coords) { PlacementLogic(coords); AddToDictionary(); }
     public Vector3Int GetCoords() { return _coords; }
 
     // NEIGHBORS //
@@ -60,10 +58,24 @@ public abstract class Piece {
         }
     }
 
+    private void CheckForNewNeighbors()
+    {
+        for (int i = 0; i < 6; i++)
+        {
+            if (_neighbors[i] != null) continue;
+            Vector3Int nPos = CoordsFromIndex(_coords, i);
+            if (_posToPiece.TryGetValue((Vector2Int)nPos, out Stack<Piece> stack))
+            {
+                JoinNeighbors(this, stack.Peek(), i);
+            }
+        }
+    }
+
+
     public static void JoinNeighbors (Piece p1, Piece p2, int dir)
     {
         p1._neighbors[dir] = p2;
-        if (p2 != null) p2._neighbors[(dir + 3) % 6] = p2;
+        if (p2 != null) p2._neighbors[(dir + 3) % 6] = p1;
     }
 
     public void SetNeighbors(Piece[] neighbors) {
@@ -74,38 +86,18 @@ public abstract class Piece {
     }
 
     public Piece[] GetNeighbors() { return _neighbors; }
-
-    private void CheckForNewNeighbors()
-    {
-        for (int i = 0; i < 6 && _neighbors[i] == null; i++)
-        {
-            Vector3Int nPos = CoordsFromIndex(_coords, i);
-            if (_posToPiece.TryGetValue((Vector2Int)nPos, out Stack<Piece> stack))
-            {
-                JoinNeighbors(this, stack.Peek(), i);
-            }
-        }
-    }
-
     public List<GhostPiece> CreateGhostNeighbors()
     {
         List<GhostPiece> newPieces = new List<GhostPiece>();
         for (int i=0; i<6; ++i) {
             if (_neighbors[i] == null) {
                 GhostPiece p = new GhostPiece(); //TODO: non istanziare ma prenderli da una pool
-                _neighbors[i] = p;
                 p.Place(CoordsFromIndex(_coords, i));
                 newPieces.Add(p);
                 JoinNeighbors(this, p, i);
+                JoinNeighbors(_neighbors[(i + 5) % 6], _neighbors[i], (i + 1) % 6);
             }
         }
-
-        JoinNeighbors(_neighbors[0], _neighbors[1], 2);
-        JoinNeighbors(_neighbors[1], _neighbors[2], 3);
-        JoinNeighbors(_neighbors[2], _neighbors[3], 4);
-        JoinNeighbors(_neighbors[3], _neighbors[4], 5);
-        JoinNeighbors(_neighbors[4], _neighbors[5], 0);
-        JoinNeighbors(_neighbors[5], _neighbors[0], 1);
 
         for (int i=0; i<6; ++i) {
             _neighbors[i].CheckForNewNeighbors();
@@ -118,17 +110,29 @@ public abstract class Piece {
 public abstract class PlayablePiece : Piece
 {
     private int _owner = 0;
+    private bool _placed = false;
 
     // OWNER //
-    public void SetOwner(int owner) { _owner = owner; }
+    public PlayablePiece SetOwner(int owner) { _owner = owner; return this; }
     public int GetOwner() { return _owner; }
 
+    // PLACEMENT //
+    protected override void PlacementLogic(Vector3Int coords) {
+        _coords = coords;
+        _coords.y ++;
+        _placed = true;
+    }
+
+    public bool IsPlaced() { return _placed; }
 }
 
 public sealed class GhostPiece : Piece {
     public GhostPiece()
     {
         SetPieceType(PieceType.ghost);
+    }
+    protected override void PlacementLogic(Vector3Int coords) {
+        _coords = coords;
     }
 }
 
