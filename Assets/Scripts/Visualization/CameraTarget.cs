@@ -5,7 +5,6 @@ using UnityEngine.InputSystem;
 public class CameraTarget : MonoBehaviour
 {
     [SerializeField] private CinemachineCamera _cinemachine;
-    [SerializeField] private float _edgeSize = 15f;
     [SerializeField] private float _moveSpeed = 10f;
     [SerializeField] private float _zoomSpeed = 2f;
     private Vector3 _cameraDirection;
@@ -27,23 +26,15 @@ public class CameraTarget : MonoBehaviour
 
     private void MoveCamera()
     {
+        Vector2 mousePos = Mouse.current.position.ReadValue();
+        if (!Mouse.current.leftButton.IsPressed()) return;
 
-        Vector2 mouse = Mouse.current.position.ReadValue();
+        if (Mouse.current.delta.value.magnitude < 1.5f) return;
 
         float scale = (_totalZoom - _zoomExtremes.x + 5) / (_zoomExtremes.y - _zoomExtremes.x);
 
-        float horizontal = 0f;
-        float vertical = 0f;
-
-        if (mouse.x < _edgeSize)
-            horizontal = -1f;
-        else if (mouse.x > Screen.width - _edgeSize)
-            horizontal = 1f;
-
-        if (mouse.y < _edgeSize)
-            vertical = -1f;
-        else if (mouse.y > Screen.height - _edgeSize)
-            vertical = 1f;
+        float horizontal = -Mouse.current.delta.value.x;
+        float vertical = -Mouse.current.delta.value.y;
 
         Vector3 movement = new Vector3(horizontal, 0, vertical);
 

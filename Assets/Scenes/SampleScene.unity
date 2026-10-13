@@ -916,8 +916,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: '::'
   _cinemachine: {fileID: 1832510363}
-  _edgeSize: 15
-  _moveSpeed: 10
+  _moveSpeed: 20
   _zoomSpeed: 10
 --- !u!1 &2090646985
 GameObject:

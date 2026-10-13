@@ -1,11 +1,14 @@
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 
 public class PlacementManager : MonoBehaviour
 {
     [SerializeField] private GameManager _gameManager;
     private PieceIcon _candidatePiece;
+    private bool _clickReady = false;
+    private float _totalMovement = 0;
 
     void Update()
     {
@@ -54,17 +57,25 @@ public class PlacementManager : MonoBehaviour
     }
 
     private void CheckLeftButton() {
-        if (Mouse.current.leftButton.wasPressedThisFrame) {
-            Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
-            if (Physics.Raycast(ray, out RaycastHit hit)) {
-                GameObject clickedObject = hit.collider.gameObject;
-                PieceObject pObj = clickedObject.GetComponent<PieceObject>();
-                if (pObj == null) return;
+        if (!_clickReady && Mouse.current.leftButton.wasPressedThisFrame) {
+            _clickReady = true;
+            _totalMovement = 0;
+        }
+        _totalMovement += Mouse.current.delta.value.SqrMagnitude();
+        if (_clickReady &&  _totalMovement > 5) _clickReady = false;
+        if (!_clickReady || !Mouse.current.leftButton.wasReleasedThisFrame) return;
+        if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject()) return;
 
-                if (pObj.GetReference() is GhostPiece)
-                {
-                    TryPlacingPiece(pObj);
-                }
+        Ray ray = Camera.main.ScreenPointToRay(Mouse.current.position.ReadValue());
+
+        if (Physics.Raycast(ray, out RaycastHit hit)) {
+            GameObject clickedObject = hit.collider.gameObject;
+            PieceObject pObj = clickedObject.GetComponent<PieceObject>();
+            if (pObj == null) return;
+
+            if (pObj.GetReference() is GhostPiece)
+            {
+                TryPlacingPiece(pObj);
             }
         }
     }
