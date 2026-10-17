@@ -31,38 +31,64 @@ public sealed class GameState {
 
         GhostPiece firstPiece = new GhostPiece();
         firstPiece.Place(new Vector3Int(0, 0, 0));
-        _ghostPieces.Add(_nextIndex, firstPiece.SetIndexAndState(_nextIndex, this));
+        _ghostPieces.Add(_nextIndex, (GhostPiece)firstPiece.SetIndexAndState(_nextIndex, this));
         _whiteSpawns.Add(_nextIndex++, firstPiece);
 
         _whiteQueenOnlyReserve.Add(_wqIndex = _nextIndex++, new QueenPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new AntPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new AntPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new AntPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new SpiderPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new SpiderPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new BeetlePiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new BeetlePiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new GrasshopperPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new GrasshopperPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new GrasshopperPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new MosquitoPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new LadybugPiece().SetOwner(0));
-        _whiteReserve.Add(_nextIndex++, new PillbugPiece().SetOwner(0));
+        _whiteReserve.Add(_nextIndex++,
+            (PlayablePiece)new AntPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++,
+            (PlayablePiece)new AntPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new AntPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new SpiderPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new SpiderPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new BeetlePiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new BeetlePiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new GrasshopperPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new GrasshopperPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new GrasshopperPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new MosquitoPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new LadybugPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
+        _whiteReserve.Add(_nextIndex++, 
+            (PlayablePiece)new PillbugPiece().SetOwner(0).SetIndexAndState(_nextIndex, this));
 
         _blackQueenOnlyReserve.Add(_bqIndex = _nextIndex++, new QueenPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new AntPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new AntPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new AntPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new SpiderPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new SpiderPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new BeetlePiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new BeetlePiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new GrasshopperPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new GrasshopperPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new GrasshopperPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new MosquitoPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new LadybugPiece().SetOwner(1));
-        _blackReserve.Add(_nextIndex++, new PillbugPiece().SetOwner(1));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new AntPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new AntPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new AntPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new SpiderPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new SpiderPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new BeetlePiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new BeetlePiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new GrasshopperPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new GrasshopperPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new GrasshopperPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new MosquitoPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new LadybugPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
+        _blackReserve.Add(_nextIndex++, 
+            (PlayablePiece)new PillbugPiece().SetOwner(1).SetIndexAndState(_nextIndex, this));
     }
 
     public Dictionary<byte, PlayablePiece> GetPlayablePieces()
@@ -119,11 +145,11 @@ public sealed class GameState {
         newPiece.SetNeighbors(oldPiece.GetNeighbors());
         newPiece.SetCoveredPiece(oldPiece);
         foreach (GhostPiece p in newPiece.CreateGhostNeighbors()) {
-            _ghostPieces.Add(_nextIndex, p.SetIndexAndState(_nextIndex, this));
+            _ghostPieces.Add(_nextIndex, (GhostPiece)p.SetIndexAndState(_nextIndex, this));
             newSpawns.Add(_nextIndex++, p);
         }
 
-        _turn = (byte)(1 - _turn); //REMINDER: va fatto dopo qualsiasi mossa
+        _turn = (byte)(1 - _turn);
         _moveCount++;
 
         if      (newPieceIndex == _wqIndex) _whiteQueenPlaced = true;
@@ -132,9 +158,36 @@ public sealed class GameState {
         else if (_moveCount == 2) _blackReserve.Add(_bqIndex, _blackQueenOnlyReserve.GetValueOrDefault(_bqIndex));
     }
 
-    public void MovePiece(byte pieceIndex, byte positionIndex, byte pieceOwner, bool isOnTopOfPiece)
+    public void MovePiece(byte pieceIndex, byte positionIndex, bool isOnTopOfPiece)
     {
-        
+        PlayablePiece p = _playablePieces.GetValueOrDefault(pieceIndex);
+        Piece destination = isOnTopOfPiece ? _playablePieces.GetValueOrDefault(positionIndex) :
+                                             _ghostPieces.GetValueOrDefault(positionIndex);
+        Piece previouslyCovered = p.GetCoveredPiece();
+
+        Vector3Int newCoords = destination.GetCoords();
+        newCoords.z++;
+        p.Move(newCoords);
+        //PRENDERE NUOVI VICINI DENTRO IL METODO, OVVERO COPIARE QUELLI DEL PEZZO COPERTO
+        //SE UNO DEI VICINI è IL PEZZO CHE SI è APPENA MOSSO,
+        //SOSTITUIRLO CON IL PEZZO PRECEDENTEMENTE COPERTO, SIA PER Sé STESSO CHE PER IL NUOVO PEZZO COPERTO
+            p.SetCoveredPiece(destination); //METTERLO NEL METODO MOVE
+            previouslyCovered.SetCovered(false); //METTERLO NEL METODO MOVE
+        //GENERARE NUOVI GHOSTPIECE SE NECESSARIO
+
+        //AGGIORNARE MOVIMENTI DI TUTTI I PEZZI COINVOLTI UNA VOLTA SOLA (creare hashset e scorrerlo?)
+            //PRECEDENTI VICINI
+            //NUOVI VICINI
+            //NUOVO PEZZO COPERTO
+            //PROPRI MOVIMENTI
+
+        //Todo: controllo anelli
+            //struttura che rappresenta un anello, una per ogni anello in gioco
+            //quando viene creato un anello, creare la struttura e aggiornare i movimenti dei pezzi coinvolti
+            //quando viene distrutto un anello, aggiornare i movimenti dei pezzi coinvolti e distruggere struttura
+
+        _turn = (byte)(1 - _turn);
+        _moveCount++;
     }
 
     public void UpdateSpawnInfo (byte ghostIndex, byte previousOwner, byte newOwner, GhostPiece p)

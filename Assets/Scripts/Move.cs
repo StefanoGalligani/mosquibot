@@ -1,6 +1,3 @@
-
-using UnityEngine.Pool;
-
 public abstract class Move
 {
     public abstract void PerformMove(GameState state);
@@ -27,19 +24,17 @@ public sealed class MovementMove : Move
 {
     private byte _pieceIndex;
     private byte _positionIndex;
-    private byte _pieceOwner;
     private bool _isOnTopOfPiece;
 
-    public MovementMove(byte pieceIndex, byte positionIndex, byte pieceOwner, bool isOnTopOfPiece)
+    public MovementMove(byte pieceIndex, byte positionIndex, bool isOnTopOfPiece)
     {
         _pieceIndex = pieceIndex;
         _positionIndex = positionIndex;
-        _pieceOwner = pieceOwner;
         _isOnTopOfPiece = isOnTopOfPiece;
     }
 
     public override void PerformMove(GameState state)
     {
-        state.MovePiece(_pieceIndex, _positionIndex, _pieceOwner, _isOnTopOfPiece);
+        state.MovePiece(_pieceIndex, _positionIndex, _isOnTopOfPiece);
     }
 }

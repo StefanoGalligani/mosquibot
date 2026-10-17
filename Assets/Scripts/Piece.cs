@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using UnityEditor.ShaderGraph.Drawing.Inspector.PropertyDrawers;
 using UnityEngine;
 
 public enum PieceType {
@@ -17,7 +18,10 @@ public abstract class Piece {
     protected Vector3Int _coords = Vector3Int.zero;
     private Piece[] _neighbors = {null, null, null, null, null, null};
     private PieceType _type;
+    private byte _index;
+    private GameState _state;
     private static Dictionary<Vector2Int, Stack<Piece>> _posToPiece = new Dictionary<Vector2Int, Stack<Piece>>();
+    private bool _covered = false;
 
     // TYPE //
 
@@ -41,7 +45,22 @@ public abstract class Piece {
     // COORDS //
     protected abstract void PlacementLogic(Vector3Int coords);
     public void Place(Vector3Int coords) { PlacementLogic(coords); AddToDictionary(); }
+    public void Move(Vector3Int newCoords)
+    {
+        _posToPiece.GetValueOrDefault(new Vector2Int(_coords.x, _coords.y)).Pop();
+        _coords = newCoords;
+        AddToDictionary();
+    }
     public Vector3Int GetCoords() { return _coords; }
+
+    public Piece SetIndexAndState(byte index, GameState state)
+    {
+        _index = index;
+        _state = state;
+        return this;
+    }
+    public byte GetIndex() { return _index; }
+    public GameState GetGameState() { return _state; }
 
     // NEIGHBORS //
 
@@ -108,54 +127,19 @@ public abstract class Piece {
 
         return newPieces;
     }
-}
 
-public abstract class PlayablePiece : Piece
-{
-    private byte _owner = 0;
-    private bool _placed = false;
-    private Piece _coveredPiece;
-
-    // OWNER //
-    public PlayablePiece SetOwner(byte owner) { _owner = owner; return this; }
-    public byte GetOwner() { return _owner; }
-
-    // PLACEMENT //
-    protected override void PlacementLogic(Vector3Int coords) {
-        _coords = coords;
-        _coords.z ++;
-        _placed = true;
-    }
-
-    public void SetCoveredPiece(Piece p) { _coveredPiece = p; }
-
-    public bool IsPlaced() { return _placed; }
-
-    // NEIGHBORS
-
-    protected override void UpdateNeighborInfo(Piece newNeighbor, byte dir)
-    {
-        // TODO implementarlo nelle sottoclassi
-    }
+    public void SetCovered(bool covered) { _covered = covered; }
+    public bool IsCovered() { return _covered; }
 }
 
 public sealed class GhostPiece : Piece {
     private byte[] _neighborColorsCount = {0, 0, 6};
     private byte[] _neighbourColors = {2, 2, 2, 2, 2, 2};
     private byte _spawnColor = 2;
-    private byte _index;
-    private GameState _state;
 
     public GhostPiece()
     {
         SetPieceType(PieceType.ghost);
-    }
-
-    public GhostPiece SetIndexAndState(byte index, GameState state)
-    {
-        _index = index;
-        _state = state;
-        return this;
     }
 
     protected override void PlacementLogic(Vector3Int coords) {
@@ -180,8 +164,8 @@ public sealed class GhostPiece : Piece {
             else if (_neighborColorsCount[0] == 0 && _neighborColorsCount[1] != 0) _spawnColor = 1;
             else _spawnColor = 2;
 
-            if (_state != null && prevColor != _spawnColor)
-                _state.UpdateSpawnInfo(_index, prevColor, _spawnColor, this);
+            if (GetGameState() != null && prevColor != _spawnColor)
+                GetGameState().UpdateSpawnInfo(GetIndex(), prevColor, _spawnColor, this);
         }
     }
 
@@ -189,17 +173,68 @@ public sealed class GhostPiece : Piece {
 
 }
 
+public abstract class PlayablePiece : Piece
+{
+    private byte _owner = 0;
+    private bool _placed = false;
+    private Piece _coveredPiece;
+
+    // OWNER //
+    public PlayablePiece SetOwner(byte owner) { _owner = owner; return this; }
+    public byte GetOwner() { return _owner; }
+
+    // PLACEMENT //
+    protected override void PlacementLogic(Vector3Int coords) {
+        _coords = coords;
+        _coords.z ++;
+        _placed = true;
+    }
+
+    public void SetCoveredPiece(Piece p) { _coveredPiece = p; p.SetCovered(true); }
+    public Piece GetCoveredPiece() { return _coveredPiece; }
+    public bool IsPlaced() { return _placed; }
+    protected override void UpdateNeighborInfo(Piece newNeighbor, byte dir)
+    {
+        //Todo: serve a qualcosa in questa classe?
+    }
+    public abstract void UpdateMoves();
+    public abstract List<MovementMove> GetMoves();
+}
+
 public sealed class QueenPiece : PlayablePiece {
+    private QueenMovementHandler _movementHandler;
     public QueenPiece()
     {
         SetPieceType(PieceType.queen);
+        _movementHandler = new QueenMovementHandler();
     }
+
+    public override List<MovementMove> GetMoves()
+    {
+        return _movementHandler.GetMoves();
+    }
+
+    public override void UpdateMoves()
+    {
+        _movementHandler.RecalculateMoves(GetNeighbors(), GetIndex());
+    }
+
 }
 
 public sealed class AntPiece : PlayablePiece {
     public AntPiece()
     {
         SetPieceType(PieceType.ant);
+    }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
     }
 }
 
@@ -208,12 +243,32 @@ public sealed class SpiderPiece : PlayablePiece {
     {
         SetPieceType(PieceType.spider);
     }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public sealed class BeetlePiece : PlayablePiece {
     public BeetlePiece()
     {
         SetPieceType(PieceType.beetle);
+    }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
     }
 }
 
@@ -222,12 +277,32 @@ public sealed class GrasshopperPiece : PlayablePiece {
     {
         SetPieceType(PieceType.grasshopper);
     }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public sealed class MosquitoPiece : PlayablePiece {
     public MosquitoPiece()
     {
         SetPieceType(PieceType.mosquito);
+    }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
     }
 }
 
@@ -236,11 +311,31 @@ public sealed class LadybugPiece : PlayablePiece {
     {
         SetPieceType(PieceType.ladybug);
     }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
+    }
 }
 
 public sealed class PillbugPiece : PlayablePiece {
     public PillbugPiece()
     {
         SetPieceType(PieceType.pillbug);
+    }
+
+    public override List<MovementMove> GetMoves()
+    {
+        throw new System.NotImplementedException();
+    }
+
+    public override void UpdateMoves()
+    {
+        throw new System.NotImplementedException();
     }
 }
